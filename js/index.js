@@ -44,9 +44,9 @@ function fillShipList(response){
     let responseParsed = JSON.parse(response);
     let meta = responseParsed.meta;
     let data = responseParsed.data;
-
+    
     shipList = {};
-
+    
     for(ship in data){
         let shipInfo = data[ship];
         if(shipInfo.is_premium == 0 && shipInfo.is_special == 0){
@@ -60,7 +60,8 @@ function fillShipList(response){
             shipTwoElement.appendChild(optionTwo);
         }
     }
-
+    console.log(shipList);
+    
     shipOneElement.value = 0;
     shipTwoElement.value = 0;
 }
@@ -81,11 +82,9 @@ function emptyShipList(){
 function checkValidInfo(e){
     e.preventDefault();
     e.stopPropagation();
-
+    
     let shipOneOptionSelected = shipOneElement.options[shipOneElement.selectedIndex];
     let shipTwoOptionSelected = shipTwoElement.options[shipTwoElement.selectedIndex];
-
-    let listTierToGo = [];
     
     if(shipOneOptionSelected.value != 0 && shipTwoOptionSelected.value != 0){
         if(parseInt(shipOneOptionSelected.getAttribute('data-tier')) < parseInt(shipTwoOptionSelected.getAttribute('data-tier'))){
@@ -93,7 +92,7 @@ function checkValidInfo(e){
             let arrayStart = [shipOneOptionSelected.value];
             arrayShipList.push(arrayStart);
             getAllShipPath(arrayShipList, checkIfShipInPath);
-
+            
             function checkIfShipInPath(listPath){
                 foundValidPath = false;
                 for(let k = 0; k < listPath.length; k++){
@@ -144,15 +143,27 @@ function calculateXpValue(path, shipIdOne, shipIdTwo){
     let xpCount = 0;
     for(let k = 0; k < listShipId.length; k++){
         let shipInfo = shipList[listShipId[k]];
-        for(nextShip in shipInfo.next_ships){
+        if(k == 0){
+            for(let ship in shipList){
+                for(let nextShip in shipList[ship].next_ships){
+                    console.log(nextShip);
+                    console.log(shipList[ship].next_ships[nextShip]);
+                    if(nextShip == listShipId[k]){
+                        console.log(true);
+                        xpCount+= shipList[ship].next_ships[nextShip]
+                    }
+                }
+            }
+        }        
+        for(let nextShip in shipInfo.next_ships){
             if(listShipId.includes(nextShip)){
                 xpCount+= shipInfo.next_ships[nextShip];
             }
         }
-        for(modulesId in shipInfo.modules_tree){
+        for(let modulesId in shipInfo.modules_tree){
             let module = shipInfo.modules_tree[modulesId];
             if(module.next_ships != null){
-                for(nextShip in module.next_ships){
+                for(let nextShip in module.next_ships){
                     let shipIdToCompare = module.next_ships[nextShip];
                     for(let k = 0; k < listShipId.length; k++){
                         if(shipIdToCompare == listShipId[k]){
